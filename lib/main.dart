@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutterapp/pages/home.dart';
+import 'package:flutterapp/pages/auth.dart';
+import 'package:flutterapp/pages/products.dart';
 
 void main() {
   // debugPaintSizeEnabled = true;
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
           primarySwatch: Colors.deepOrange,
           accentColor: Colors.deepPurple),
-      home: HomePage(),
+      home: AuthPage(),
     );
   }
 }
