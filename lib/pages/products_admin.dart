@@ -2,10 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/pages/product_create.dart';
 import 'package:flutterapp/pages/product_list.dart';
+import 'package:flutterapp/pages/products.dart';
 
 import '../product_manager.dart';
 
-class ProductsAdminPage extends StatelessWidget {
+class ProductAdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -19,9 +20,10 @@ class ProductsAdminPage extends StatelessWidget {
                 title: Text('Choose'),
               ),
               ListTile(
-                title: Text('Manage Products'),
+                title: Text('EasyList'),
                 onTap: (){
-
+                  Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (BuildContext context) => ProductsPage()));
                 },
               )
             ],
