@@ -52,21 +52,25 @@ class _MyAppState extends State<MyApp> {
       },
       onGenerateRoute: (RouteSettings settings) {
         final List<String> pathElements = settings.name.split('/');
-
+        print(pathElements);
         if(pathElements[0] != ''){
           return null;
         }
 
         if(pathElements[1] == 'product'){
           final int index = int.parse(pathElements[2]);
+          print(_products);
           return MaterialPageRoute<bool>(
-            builder: (BuildContext context) => ProductPage(
-                _products[index]['title'],
-                _products[index]['image']
-            ),
+            builder: (BuildContext context) => ProductPage(_products[index]['title'],
+                _products[index]['image']),
           );
         }
         return null;
+      },
+      onUnknownRoute: (RouteSettings settings) {
+        return MaterialPageRoute(builder: (BuildContext context) =>
+            ProductsPage(_products, _addProduct, _deleteProduct)
+        );
       },
     );
   }
