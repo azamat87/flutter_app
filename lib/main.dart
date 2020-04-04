@@ -47,13 +47,14 @@ class _MyAppState extends State<MyApp> {
           accentColor: Colors.deepPurple),
 //      home: AuthPage(),
       routes: {
-        '/': (BuildContext context) => ProductsPage(_products),
+        '/': (BuildContext context) => AuthPage(),
+//        '/': (BuildContext context) => ProductsPage(_products),
         '/admin': (BuildContext context) => ProductAdminPage(_addProduct, _deleteProduct),
       },
       onGenerateRoute: (RouteSettings settings) {
         final List<String> pathElements = settings.name.split('/');
         print(pathElements);
-        if(pathElements[0] != ''){
+        if(pathElements[0] != '') {
           return null;
         }
 
