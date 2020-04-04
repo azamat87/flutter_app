@@ -25,9 +25,22 @@ class Products extends StatelessWidget {
                 ),
                 ),
                 SizedBox(width: 8.0),
-                DecoratedBox(
-                  decoration: BoxDecoration(color: Theme.of(context).accentColor),
-                  child: Text(products[index]['price'].toString()),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.5),
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).accentColor,
+                      borderRadius: BorderRadius.circular(5.0)),
+                  child: Text(
+                      '\$${products[index]['price'].toString()}',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 1.0),
+                    borderRadius: BorderRadius.circular(6.0)
+                  ),
+                  child: Text('Union Square')
                 )
               ],
             ),
