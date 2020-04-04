@@ -67,7 +67,7 @@ class _AuthPageState extends State<AuthPage> {
                   RaisedButton(
                       child: Text('LOGIN'),
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/');
+                        Navigator.pushReplacementNamed(context, '/products');
                       }),
                 ],
               ),
