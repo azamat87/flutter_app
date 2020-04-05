@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ProductCreatePage extends StatefulWidget {
@@ -18,40 +20,56 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   String titleValue;
   String descriptionValue;
   double priceValue;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Widget _buildTitleTextField() {
-    return TextField(
+    return TextFormField(
       decoration: InputDecoration(
           labelText: 'Product Title'
       ),
-      onChanged: (String value) {
-        titleValue = value;
+      validator: (String value) {
+        if(value.isEmpty) {
+          return 'Title is required';
+        }
+      },
+      onSaved: (String value) {
+        setState(() {
+          titleValue = value;
+        });
       },);
   }
 
   Widget _buildDescriptionTextField() {
-    return TextField(
+    return TextFormField(
       decoration: InputDecoration(
           labelText: 'Product Description'
       ),
       maxLines: 4,
-      onChanged: (String value) {
-        descriptionValue = value;
+      onSaved: (String value) {
+        setState(() {
+          descriptionValue = value;
+        });
       },);
   }
 
   Widget _buildPriceTextField() {
-    return TextField(
+    return TextFormField(
       decoration: InputDecoration(
           labelText: 'Product Price'
       ),
       keyboardType: TextInputType.number,
-      onChanged: (String value) {
-        priceValue = double.parse(value);
+      onSaved: (String value) {
+        setState(() {
+          priceValue = double.parse(value);
+        });
       },);
   }
 
   void _submitForm(){
+    if(!_formKey.currentState.validate()){
+      return;
+    }
+    _formKey.currentState.save();
     final Map<String, dynamic> product = {
       'title' : titleValue,
       'description': descriptionValue,
@@ -70,19 +88,22 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
 
     return Container(
       margin: EdgeInsets.all(10.0),
-      child: ListView(
-        padding: EdgeInsets.symmetric(horizontal: targetPadding / 2),
-        children: <Widget>[
-          _buildTitleTextField(),
-          _buildDescriptionTextField(),
-          _buildPriceTextField(),
-          SizedBox(height: 10.0),
-          RaisedButton(
-            textColor: Colors.white,
-            child: Text('Save'),
-              onPressed: _submitForm
-          )
-        ],
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: targetPadding / 2),
+          children: <Widget>[
+            _buildTitleTextField(),
+            _buildDescriptionTextField(),
+            _buildPriceTextField(),
+            SizedBox(height: 10.0),
+            RaisedButton(
+              textColor: Colors.white,
+              child: Text('Save'),
+                onPressed: _submitForm
+            )
+          ],
+        ),
       ),
     );
   }
