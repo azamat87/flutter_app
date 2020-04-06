@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/pages/auth.dart';
 import 'package:flutterapp/pages/product.dart';
 import 'package:flutterapp/pages/products.dart';
@@ -22,9 +23,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  List<Map<String, dynamic>> _products = [];
+  List<Product> _products = [];
 
-  void _addProduct(Map<String, dynamic> product) {
+  void _addProduct(Product product) {
     setState(() {
       _products.add(product);
     });
@@ -37,7 +38,7 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _updateProduct(int index, Map<String, dynamic> product) {
+  void _updateProduct(int index, Product product) {
     setState(() {
       _products[index] = product;
     });
@@ -69,8 +70,10 @@ class _MyAppState extends State<MyApp> {
           final int index = int.parse(pathElements[2]);
           print(_products);
           return MaterialPageRoute<bool>(
-            builder: (BuildContext context) => ProductPage(_products[index]['title'],
-                _products[index]['image'], _products[index]['price']),
+            builder: (BuildContext context) => ProductPage(_products[index].title,
+                _products[index].image,
+                _products[index].price,
+                _products[index].description),
           );
         }
         return null;

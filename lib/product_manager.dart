@@ -14,7 +14,7 @@ class ProductManager extends StatelessWidget {
     print('[ProductManager State] build()');
     return Column(
       children: [
-        Expanded(child: Products(products))
+//        Expanded(child: Products(products))
       ],
     );
   }

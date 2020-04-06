@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterapp/constants.dart';
+import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/widgets/helpers/ensure_visible.dart';
 
 class ProductEditPage extends StatefulWidget {
   final Function addProduct;
   final Function updateProduct;
-  final Map<String, dynamic> product;
+  final Product product;
   final int productIndex;
 
   ProductEditPage({this.addProduct, this.updateProduct, this.product, this.productIndex});
@@ -37,7 +38,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: TextFormField(
         focusNode: _titleFocusNode,
         decoration: InputDecoration(labelText: 'Product Title'),
-        initialValue: widget.product == null ? '' : widget.product[TITLE],
+        initialValue: widget.product == null ? '' : widget.product.title,
         validator: (String value) {
           if (value.isEmpty || value.length < 5) {
             return 'Title is required and should be 5+ characters long';
@@ -56,7 +57,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: TextFormField(
         focusNode: _descFocusNode,
         decoration: InputDecoration(labelText: 'Product Description'),
-        initialValue: widget.product == null ? '' : widget.product[DESCRIPTION],
+        initialValue: widget.product == null ? '' : widget.product.description,
         maxLines: 4,
         validator: (String value) {
           if (value.isEmpty || value.length < 10) {
@@ -76,7 +77,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: TextFormField(
         focusNode: _priceFocusNode,
         decoration: InputDecoration(labelText: 'Product Price'),
-        initialValue: widget.product == null ? '' : widget.product[PRICE].toString(),
+        initialValue: widget.product == null ? '' : widget.product.price.toString(),
         keyboardType: TextInputType.number,
         validator: (String value) {
           if (value.isEmpty ||
@@ -97,9 +98,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
     }
     _formKey.currentState.save();
     if(widget.product == null) {
-      widget.addProduct(_formData);
+      widget.addProduct(Product(
+        title: _formData[TITLE],
+        description: _formData[DESCRIPTION],
+        price: _formData[PRICE],
+        image: _formData[IMAGE]
+      ));
     } else {
-      widget.updateProduct(widget.productIndex, _formData);
+      widget.updateProduct(widget.productIndex,
+          Product(title: _formData[TITLE],
+          description: _formData[DESCRIPTION],
+          price: _formData[PRICE],
+          image: _formData[IMAGE]
+      ));
     }
 
     Navigator.pushReplacementNamed(context, '/products');
