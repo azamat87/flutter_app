@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutterapp/constants.dart';
 import 'package:flutterapp/models/product.dart';
+import 'package:flutterapp/scoped_model/products.dart';
 import 'package:flutterapp/widgets/helpers/ensure_visible.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class ProductEditPage extends StatefulWidget {
   final Function addProduct;
@@ -11,7 +13,8 @@ class ProductEditPage extends StatefulWidget {
   final Product product;
   final int productIndex;
 
-  ProductEditPage({this.addProduct, this.updateProduct, this.product, this.productIndex});
+  ProductEditPage(
+      {this.addProduct, this.updateProduct, this.product, this.productIndex});
 
   @override
   State<StatefulWidget> createState() {
@@ -77,7 +80,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: TextFormField(
         focusNode: _priceFocusNode,
         decoration: InputDecoration(labelText: 'Product Price'),
-        initialValue: widget.product == null ? '' : widget.product.price.toString(),
+        initialValue:
+            widget.product == null ? '' : widget.product.price.toString(),
         keyboardType: TextInputType.number,
         validator: (String value) {
           if (value.isEmpty ||
@@ -92,32 +96,39 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm(Function addProduct, Function updateProduct) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
-    if(widget.product == null) {
-      widget.addProduct(Product(
-        title: _formData[TITLE],
-        description: _formData[DESCRIPTION],
-        price: _formData[PRICE],
-        image: _formData[IMAGE]
-      ));
-    } else {
-      widget.updateProduct(widget.productIndex,
-          Product(title: _formData[TITLE],
+    if (widget.product == null) {
+      addProduct(Product(
+          title: _formData[TITLE],
           description: _formData[DESCRIPTION],
           price: _formData[PRICE],
-          image: _formData[IMAGE]
-      ));
+          image: _formData[IMAGE]));
+    } else {
+      updateProduct(
+          widget.productIndex,
+          Product(
+              title: _formData[TITLE],
+              description: _formData[DESCRIPTION],
+              price: _formData[PRICE],
+              image: _formData[IMAGE]));
     }
 
     Navigator.pushReplacementNamed(context, '/products');
   }
 
-  Widget _buildPageContent(BuildContext context) {
+  Widget _buildSubmitButton() {
+    return ScopedModelDescendant(
+        builder: (BuildContext context, Widget widget, ProductModel model) {
+      return RaisedButton(
+          textColor: Colors.white, child: Text('Save'), onPressed: _submitForm(model.addProduct, model.updateProduct));
+    });
+  }
 
+  Widget _buildPageContent(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
@@ -137,10 +148,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               _buildDescriptionTextField(),
               _buildPriceTextField(),
               SizedBox(height: 10.0),
-              RaisedButton(
-                  textColor: Colors.white,
-                  child: Text('Save'),
-                  onPressed: _submitForm)
+              _buildSubmitButton()
             ],
           ),
         ),
@@ -150,7 +158,6 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final Widget pageContent = _buildPageContent(context);
 
     return widget.product == null
