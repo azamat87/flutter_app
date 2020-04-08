@@ -124,8 +124,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     return ScopedModelDescendant(
         builder: (BuildContext context, Widget widget, ProductModel model) {
       return RaisedButton(
-          textColor: Colors.white, child: Text('Save'), onPressed: _submitForm(model.addProduct, model.updateProduct));
-    });
+          textColor: Colors.white, child: Text('Save'), onPressed: () => _submitForm(model.addProduct, model.updateProduct),
+          );
+        }
+    );
   }
 
   Widget _buildPageContent(BuildContext context) {

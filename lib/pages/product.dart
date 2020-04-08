@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterapp/models/product.dart';
+import 'package:flutterapp/scoped_model/products.dart';
 import 'package:flutterapp/widgets/ui_elements/title_default.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 
 class ProductPage extends StatelessWidget {
 
-  final String title;
-  final String imageUrl;
-  final String description;
-  final double price;
+  final int productIndex;
 
-  ProductPage(this.title, this.imageUrl, this.price, this.description);
+  ProductPage(this.productIndex);
 
   _showWarningDialog(BuildContext buildContext){
     showDialog(context: buildContext, builder: (BuildContext context) {
@@ -30,7 +30,7 @@ class ProductPage extends StatelessWidget {
     });
   }
 
-  Widget _buildAddressPriceRow() {
+  Widget _buildAddressPriceRow(double price) {
     return Row (
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -59,29 +59,33 @@ class ProductPage extends StatelessWidget {
         Navigator.pop(context, false);
         return Future.value(false);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Image.asset(imageUrl),
-            Container(
+      child: ScopedModelDescendant<ProductModel>(builder: (BuildContext context, Widget child, ProductModel model) {
+        Product product = model.products[productIndex];
+
+        return  Scaffold(
+          appBar: AppBar(
+            title: Text(product.title),
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(product.image),
+              Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: TitleDefault(product.title)),
+              _buildAddressPriceRow(product.price),
+              Container(
                 padding: EdgeInsets.all(10.0),
-                child: TitleDefault(title)),
-            _buildAddressPriceRow(),
-            Container(
-              padding: EdgeInsets.all(10.0),
-              child: RaisedButton(
-                color: Theme.of(context).accentColor,
-                child: Text('DELETE'),
-                onPressed: () => _showWarningDialog(context),
-              ),
-            )
-          ],
-        ),
-      ),
+                child: RaisedButton(
+                  color: Theme.of(context).accentColor,
+                  child: Text('DELETE'),
+                  onPressed: () => _showWarningDialog(context),
+                ),
+              )
+            ],
+          ),
+        );
+      })
     );
   }
 }
