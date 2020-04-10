@@ -13,7 +13,6 @@ class ConnectedProductsModel extends Model {
         price: price, image: image, userEmail: _authenticatedUser.email, userId: _authenticatedUser.id);
 
     _products.add(newProduct);
-    _selProductIndex = null;
     notifyListeners();
   }
 
@@ -51,7 +50,6 @@ class ProductModel extends ConnectedProductsModel {
 
   void deleteProduct() {
     _products.removeAt(selectedProductIndex);
-    _selProductIndex = null;
     notifyListeners();
   }
 
@@ -60,7 +58,6 @@ class ProductModel extends ConnectedProductsModel {
         price: price, image: image, userEmail: selectedProduct.userEmail, userId: selectedProduct.userId);
 
     _products[selectedProductIndex] = updateProduct;
-    _selProductIndex = null;
     notifyListeners();
   }
 
@@ -76,12 +73,10 @@ class ProductModel extends ConnectedProductsModel {
         userId: selectedProduct.userId,
         isFavorite: newFavoriteStatus);
     _products[selectedProductIndex] = updatedProduct;
-    _selProductIndex = null;
     notifyListeners();
   }
 
   void selectProduct(int index) {
-    _selProductIndex = index;
     notifyListeners();
   }
 
