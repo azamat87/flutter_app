@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/pages/products.dart';
 import 'package:flutterapp/pages/products_admin.dart';
+import 'package:flutterapp/scoped_model/main.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -10,6 +12,13 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
+
+  final Map<String, dynamic> _formData = {
+    'email': null,
+    'password': null,
+    'acceptTerms': null
+  };
+
   String _email;
   String _password;
   bool _acceptTerms = false;
@@ -61,7 +70,10 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm(Function login) {
+
+
+    login(_formData['email'], _formData['password']);
     Navigator.pushReplacementNamed(context, '/products');
   }
 
@@ -89,9 +101,13 @@ class _AuthPageState extends State<AuthPage> {
                   _buildPasswordTextField(),
                   _buildAcceptSwitch(),
                   SizedBox(height: 10.0),
-                  RaisedButton(
-                      child: Text('LOGIN'),
-                      onPressed: _submitForm,
+                  ScopedModelDescendant<MainModel>(
+                    builder: (BuildContext context, Widget child, MainModel model){
+                      return RaisedButton(
+                        child: Text('LOGIN'),
+                        onPressed: () => _submitForm(model.login),
+                      );
+                    },
                   )
                   ],
                 ),

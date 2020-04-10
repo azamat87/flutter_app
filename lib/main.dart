@@ -4,7 +4,7 @@ import 'package:flutterapp/pages/auth.dart';
 import 'package:flutterapp/pages/product.dart';
 import 'package:flutterapp/pages/products.dart';
 import 'package:flutterapp/pages/products_admin.dart';
-import 'package:flutterapp/scoped_model/products.dart';
+import 'package:flutterapp/scoped_model/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 void main() {
@@ -27,8 +27,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<ProductModel>(
-      model: ProductModel(),
+    return ScopedModel<MainModel>(
+      model: MainModel(),
       child: MaterialApp(
         // debugShowMaterialGrid: true,
         theme: ThemeData(
