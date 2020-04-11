@@ -87,40 +87,40 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm(Function addProduct, Function updateProduct, Function setSelectedProduct,
+  void _submitForm(
+      Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == null) {
-      addProduct(
-          _formData[TITLE],
-          _formData[DESCRIPTION],
-          _formData[PRICE],
-          _formData[IMAGE]
-          );
+      addProduct(_formData[TITLE], _formData[DESCRIPTION], _formData[PRICE],
+              _formData[IMAGE])
+          .then((_) => Navigator.pushReplacementNamed(context, '/products')
+              .then((_) => setSelectedProduct(null)));
     } else {
-      updateProduct(
-          _formData[TITLE],
-          _formData[DESCRIPTION],
-          _formData[PRICE],
-          _formData[IMAGE]
-          );
+      updateProduct(_formData[TITLE], _formData[DESCRIPTION], _formData[PRICE],
+          _formData[IMAGE]);
     }
-
-    Navigator.pushReplacementNamed(context, '/products').then((_) => setSelectedProduct(null));
   }
 
   Widget _buildSubmitButton() {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget widget, MainModel model) {
-      return RaisedButton(
-        textColor: Colors.white,
-        child: Text('Save'),
-        onPressed: () => _submitForm(
-            model.addProduct, model.updateProduct, model.selectProduct, model.selectedProductIndex),
-      );
+      return model.isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : RaisedButton(
+              textColor: Colors.white,
+              child: Text('Save'),
+              onPressed: () => _submitForm(
+                  model.addProduct,
+                  model.updateProduct,
+                  model.selectProduct,
+                  model.selectedProductIndex),
+            );
     });
   }
 
