@@ -18,25 +18,28 @@ class ConnectedProductsModel extends Model {
       TITLE: title,
       DESCRIPTION: description,
       IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
-      PRICE: price
+      PRICE: price,
+      USER_EMAIL: _authenticatedUser.email,
+      USER_ID: _authenticatedUser.id
     };
     
-    post('https://my-product-app-85b92.firebaseio.com/products.json', body: json.encode(productData));
+    post('https://my-product-app-85b92.firebaseio.com/products.json',
+        body: json.encode(productData)).then((Response response){
+          final Map<String, dynamic> responseData = json.decode(response.body);
 
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
 
-    final Product newProduct = Product(
-      id: ,
-        title: title,
-        description: description,
-        price: price,
-        image: image,
-        userEmail: _authenticatedUser.email,
-        userId: _authenticatedUser.id);
-
-    _products.add(newProduct);
-    notifyListeners();
+      _products.add(newProduct);
+      notifyListeners();
+    });
   }
-
 }
 
 class ProductModel extends ConnectedProductsModel {
@@ -80,6 +83,27 @@ class ProductModel extends ConnectedProductsModel {
 
     _products[selectedProductIndex] = updateProduct;
     notifyListeners();
+  }
+
+  void fetchProducts() {
+    get('https://my-product-app-85b92.firebaseio.com/products.json')
+        .then((Response response) {
+          final Map<String, dynamic> productListData = json.decode(response.body);
+          final List<Product> fetchedProductLit = [];
+          productListData.forEach((String productId, dynamic productData) {
+            final Product product = Product(
+              title: productData[TITLE],
+              description: productData[DESCRIPTION],
+              image: productData[IMAGE],
+              price: productData[PRICE],
+              userEmail: productData[USER_EMAIL],
+              userId: productData[USER_ID]
+            );
+            fetchedProductLit.add(product);
+          });
+          _products = fetchedProductLit;
+          notifyListeners();
+    });
   }
 
   void toggleProductFavoriteStatus() {
