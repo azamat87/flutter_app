@@ -1,6 +1,10 @@
 
+import 'dart:convert';
+
+import 'package:flutterapp/constants.dart';
 import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/models/user.dart';
+import 'package:http/http.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ConnectedProductsModel extends Model {
@@ -9,8 +13,25 @@ class ConnectedProductsModel extends Model {
   int _selProductIndex;
 
   void addProduct(String title, String description, double price, String image) {
-    final Product newProduct = Product(title: title, description: description,
-        price: price, image: image, userEmail: _authenticatedUser.email, userId: _authenticatedUser.id);
+
+    final Map<String, dynamic> productData = {
+      TITLE: title,
+      DESCRIPTION: description,
+      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
+      PRICE: price
+    };
+    
+    post('https://my-product-app-85b92.firebaseio.com/products.json', body: json.encode(productData));
+
+
+    final Product newProduct = Product(
+      id: ,
+        title: title,
+        description: description,
+        price: price,
+        image: image,
+        userEmail: _authenticatedUser.email,
+        userId: _authenticatedUser.id);
 
     _products.add(newProduct);
     notifyListeners();
