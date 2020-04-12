@@ -94,7 +94,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       return;
     }
     _formKey.currentState.save();
-    if (selectedProductIndex == null) {
+    if (selectedProductIndex == -1) {
       addProduct(_formData[TITLE], _formData[DESCRIPTION], _formData[PRICE],
               _formData[IMAGE])
           .then((_) => Navigator.pushReplacementNamed(context, '/products')
@@ -161,7 +161,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       final Widget pageContent =
           _buildPageContent(context, model.selectedProduct);
 
-      return model.selectedProductIndex == null
+      return model.selectedProductIndex == -1
           ? pageContent
           : Scaffold(
               appBar: AppBar(

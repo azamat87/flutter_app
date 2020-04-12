@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterapp/models/product.dart';
-import 'package:flutterapp/scoped_model/main.dart';
 import 'package:flutterapp/widgets/ui_elements/title_default.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 
 class ProductPage extends StatelessWidget {
 
-  final int productIndex;
+  final Product product;
 
-  ProductPage(this.productIndex);
+  ProductPage(this.product);
 
   _showWarningDialog(BuildContext buildContext){
     showDialog(context: buildContext, builder: (BuildContext context) {
@@ -59,17 +57,19 @@ class ProductPage extends StatelessWidget {
         Navigator.pop(context, false);
         return Future.value(false);
       },
-      child: ScopedModelDescendant<MainModel>(builder: (BuildContext context, Widget child, MainModel model) {
-        Product product = model.allProducts[productIndex];
-
-        return  Scaffold(
+      child: Scaffold(
           appBar: AppBar(
             title: Text(product.title),
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Image.network(product.image),
+              FadeInImage(
+                image: NetworkImage(product.image),
+                height: 300,
+                fit: BoxFit.cover,
+                placeholder: AssetImage('images/food.png'),
+              ),
               Container(
                   padding: EdgeInsets.all(10.0),
                   child: TitleDefault(product.title)),
@@ -84,8 +84,7 @@ class ProductPage extends StatelessWidget {
               )
             ],
           ),
-        );
-      })
+        )
     );
   }
 }
