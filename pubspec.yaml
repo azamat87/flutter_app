@@ -13,9 +13,17 @@ dependencies:
   scoped_model: ^1.0.1
   http: ^0.12.0+4
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  flutter_launcher_icons: ^0.7.4
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "images/app-icon.png"
 
 flutter:
 

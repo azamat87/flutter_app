@@ -31,6 +31,7 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: mainModel,
       child: MaterialApp(
+        title: 'EasyList',
         // debugShowMaterialGrid: true,
         theme: ThemeData(
             brightness: Brightness.light,
