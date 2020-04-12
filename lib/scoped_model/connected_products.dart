@@ -19,8 +19,7 @@ class ConnectedProductsModel extends Model {
     final Map<String, dynamic> productData = {
       TITLE: title,
       DESCRIPTION: description,
-      IMAGE:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
+      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
       PRICE: price,
       USER_EMAIL: _authenticatedUser.email,
       USER_ID: _authenticatedUser.id
@@ -77,22 +76,49 @@ class ProductModel extends ConnectedProductsModel {
   }
 
   void deleteProduct() {
+    _isLoading = true;
+    final deletedProductId = selectedProduct.id;
     _products.removeAt(selectedProductIndex);
+    _selProductIndex = null;
     notifyListeners();
+    delete('https://my-product-app-85b92.firebaseio.com/products/$deletedProductId.json')
+    .then((Response response) {
+      _isLoading = false;
+
+      notifyListeners();
+    });
+
   }
 
-  void updateProduct(
+  Future<Null> updateProduct(
       String title, String description, double price, String image) {
-    final Product updateProduct = Product(
-        title: title,
-        description: description,
-        price: price,
-        image: image,
-        userEmail: selectedProduct.userEmail,
-        userId: selectedProduct.userId);
-
-    _products[selectedProductIndex] = updateProduct;
+    _isLoading = true;
     notifyListeners();
+    final Map<String, dynamic> updateData = {
+      TITLE: title,
+      DESCRIPTION: description,
+      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
+      PRICE: price,
+      USER_EMAIL: selectedProduct.userEmail,
+      USER_ID: selectedProduct.userId
+    };
+    
+    return put('https://my-product-app-85b92.firebaseio.com/products/${selectedProduct.id}.json',
+        body: json.encode(updateData))
+        .then((Response response) {
+          _isLoading = false;
+          final Product updateProduct = Product(
+              id: selectedProduct.id,
+              title: title,
+              description: description,
+              price: price,
+              image: image,
+              userEmail: selectedProduct.userEmail,
+              userId: selectedProduct.userId);
+
+          _products[selectedProductIndex] = updateProduct;
+          notifyListeners();
+        });
   }
 
   void fetchProducts() {
