@@ -48,6 +48,10 @@ class ConnectedProductsModel extends Model {
       _products.add(newProduct);
       notifyListeners();
       return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 }
@@ -90,18 +94,23 @@ class ProductModel extends ConnectedProductsModel {
     });
   }
 
-  void deleteProduct() {
+  Future<bool> deleteProduct() {
     _isLoading = true;
     final deletedProductId = selectedProduct.id;
     _products.removeAt(selectedProductIndex);
     _selProductId = null;
     notifyListeners();
-    delete(
+    return delete(
         'https://my-product-app-85b92.firebaseio.com/products/$deletedProductId.json')
         .then((Response response) {
       _isLoading = false;
 
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
@@ -135,6 +144,10 @@ class ProductModel extends ConnectedProductsModel {
 
       _products[selectedProductIndex] = updateProduct;
       notifyListeners();
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
@@ -142,7 +155,7 @@ class ProductModel extends ConnectedProductsModel {
     _isLoading = true;
     notifyListeners();
     return get('https://my-product-app-85b92.firebaseio.com/products.json')
-        .then((Response response) {
+        .then<Null>((Response response) {
       final List<Product> fetchedProductLit = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
 
@@ -166,6 +179,10 @@ class ProductModel extends ConnectedProductsModel {
       _isLoading = false;
       notifyListeners();
       _selProductId = null;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return;
     });
   }
 
