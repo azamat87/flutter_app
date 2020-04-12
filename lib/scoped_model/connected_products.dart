@@ -12,48 +12,6 @@ class ConnectedProductsModel extends Model {
   String _selProductId;
   bool _isLoading = false;
 
-  Future<bool> addProduct(String title, String description, double price,
-      String image) {
-    _isLoading = true;
-    notifyListeners();
-    final Map<String, dynamic> productData = {
-      TITLE: title,
-      DESCRIPTION: description,
-      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
-      PRICE: price,
-      USER_EMAIL: _authenticatedUser.email,
-      USER_ID: _authenticatedUser.id
-    };
-
-    return post('https://my-product-app-85b92.firebaseio.com/products.json',
-        body: json.encode(productData))
-        .then((Response response) {
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      _isLoading = false;
-      final Product newProduct = Product(
-          id: responseData['name'],
-          title: title,
-          description: description,
-          price: price,
-          image: image,
-          userEmail: _authenticatedUser.email,
-          userId: _authenticatedUser.id);
-
-      _products.add(newProduct);
-      notifyListeners();
-      return true;
-    }).catchError((error) {
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    });
-  }
 }
 
 class ProductModel extends ConnectedProductsModel {
@@ -92,6 +50,55 @@ class ProductModel extends ConnectedProductsModel {
     return _products.indexWhere((Product product) {
       return product.id == _selProductId;
     });
+  }
+
+  Future<bool> addProduct(String title, String description, double price,
+      String image) async {
+    _isLoading = true;
+    notifyListeners();
+    final Map<String, dynamic> productData = {
+      TITLE: title,
+      DESCRIPTION: description,
+      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
+      PRICE: price,
+      USER_EMAIL: _authenticatedUser.email,
+      USER_ID: _authenticatedUser.id
+    };
+
+    try {
+      final Response response = await post(
+          'https://my-product-app-85b92.firebaseio.com/products.json',
+          body: json.encode(productData));
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      _isLoading = false;
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+
+      _products.add(newProduct);
+      notifyListeners();
+      return true;
+    } catch(e) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+//        .catchError((error) {
+//      _isLoading = false;
+//      notifyListeners();
+//      return false;
+//    });
   }
 
   Future<bool> deleteProduct() {
