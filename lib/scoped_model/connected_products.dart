@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutterapp/constants.dart';
+import 'package:flutterapp/models/auth.dart';
 import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/models/user.dart';
 import 'package:http/http.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConnectedProductsModel extends Model {
   List<Product> _products = [];
@@ -67,7 +69,7 @@ class ProductModel extends ConnectedProductsModel {
 
     try {
       final Response response = await post(
-          'https://my-product-app-85b92.firebaseio.com/products.json',
+          'https://my-product-app-85b92.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
           body: json.encode(productData));
       if (response.statusCode != 200 && response.statusCode != 201) {
         _isLoading = false;
@@ -108,7 +110,7 @@ class ProductModel extends ConnectedProductsModel {
     _selProductId = null;
     notifyListeners();
     return delete(
-        'https://my-product-app-85b92.firebaseio.com/products/$deletedProductId.json')
+        'https://my-product-app-85b92.firebaseio.com/products/$deletedProductId.json?auth=${_authenticatedUser.token}')
         .then((Response response) {
       _isLoading = false;
 
@@ -136,7 +138,7 @@ class ProductModel extends ConnectedProductsModel {
 
     return put(
         'https://my-product-app-85b92.firebaseio.com/products/${selectedProduct
-            .id}.json',
+            .id}.json?auth=${_authenticatedUser.token}',
         body: json.encode(updateData))
         .then((Response response) {
       _isLoading = false;
@@ -161,7 +163,7 @@ class ProductModel extends ConnectedProductsModel {
   Future<Null> fetchProducts() {
     _isLoading = true;
     notifyListeners();
-    return get('https://my-product-app-85b92.firebaseio.com/products.json')
+    return get('https://my-product-app-85b92.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
         .then<Null>((Response response) {
       final List<Product> fetchedProductLit = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
@@ -224,9 +226,13 @@ class UserModel extends ConnectedProductsModel {
 
   final String _key = '';
 
+  User get user {
+    return _authenticatedUser;
+  }
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
-//    _authenticatedUser = User(id: "1", email: email, password: password);
+  Future<Map<String, dynamic>> authenticate(String email, String password,
+      [AuthMode mode = AuthMode.Login]) async {
+
     _isLoading = true;
     notifyListeners();
     Map<String, dynamic> authData = {
@@ -234,50 +240,64 @@ class UserModel extends ConnectedProductsModel {
       'password': password,
       'returnSecureToken': true
     };
-    final Response response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$_key',
-        body: json.encode(authData), headers: {'Content-Type': 'application/jon'});
+    Response response;
+    if (mode == AuthMode.Login) {
+      response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$_key',
+          body: json.encode(authData), headers: {'Content-Type': 'application/jon'});
+    } else {
+      response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$_key',
+          body: json.encode(authData), headers: {'Content-Type': 'application/jon'}
+      );
+    }
 
     final Map<String, dynamic> responseData = json.decode(response.body);
     bool hasError = true;
     String message = 'Somthing went wrong';
     if(responseData.containsKey('idToken')) {
       hasError = false;
+      _authenticatedUser = User(
+          id: responseData['localId'],
+          email: email,
+          token: responseData['idToken']);
       message = "Success";
+
+      final SharedPreferences shPref = await SharedPreferences.getInstance();
+      shPref.setString('token', responseData['idToken']);
+      shPref.setString('email', email);
+      shPref.setString('userId', responseData['localId']);
+
     } else if (responseData['error']['message'] == 'EMAIL_NOT_FOUND'){
       message = 'This email was not found.';
     } else if (responseData['error']['message'] == 'INVALID_PASSWORD'){
       message = 'Invalid password.';
-    }
-    _isLoading = false;
-    notifyListeners();
-    return {'success': !hasError, 'message': message};
-  }
-
-  Future<Map<String, dynamic>> singup(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-    Map<String, dynamic> authData = {
-      'email': email,
-      'password': password,
-      'returnSecureToken': true
-    };
-
-    final Response response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$_key',
-        body: json.encode(authData), headers: {'Content-Type': 'application/jon'}
-    );
-
-    final Map<String, dynamic> responseData = json.decode(response.body);
-    bool hasError = true;
-    String message = 'Somthing went wrong';
-    if(responseData.containsKey('idToken')) {
-      hasError = false;
-      message = "Success";
     } else if (responseData['error']['message'] == 'EMAIL_EXISTS'){
       message = 'This email alredy exists.';
     }
     _isLoading = false;
     notifyListeners();
     return {'success': !hasError, 'message': message};
+  }
+
+  void autoAuthenticate() async{
+    final SharedPreferences shPref = await SharedPreferences.getInstance();
+    final String token = shPref.getString('token');
+    if (token != null) {
+      final String email = shPref.getString('email');
+      final String userId = shPref.getString('userId');
+      _authenticatedUser = User(
+          id: userId,
+          email: email,
+          token: token);
+      notifyListeners();
+    }
+  }
+
+  void logout() async {
+    _authenticatedUser = null;
+    final SharedPreferences shPref = await SharedPreferences.getInstance();
+    shPref.remove('token');
+    shPref.remove('email');
+    shPref.remove('userId');
   }
 
 }

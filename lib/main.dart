@@ -17,19 +17,23 @@ void main() {
 class MyApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-
     return _MyAppState();
   }
-
 }
 
 class _MyAppState extends State<MyApp> {
+  final MainModel _mainModel = MainModel();
+
+  @override
+  void initState() {
+    _mainModel.autoAuthenticate();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final MainModel mainModel = MainModel();
     return ScopedModel<MainModel>(
-      model: mainModel,
+      model: _mainModel,
       child: MaterialApp(
         title: 'EasyList',
         // debugShowMaterialGrid: true,
@@ -40,20 +44,21 @@ class _MyAppState extends State<MyApp> {
             buttonColor: Colors.deepPurple),
 //      home: AuthPage(),
         routes: {
-          '/': (BuildContext context) => AuthPage(),
-          '/products': (BuildContext context) => ProductsPage(mainModel),
-          '/admin': (BuildContext context) => ProductAdminPage(mainModel),
+          '/': (BuildContext context) =>_mainModel.user == null ? AuthPage() : ProductsPage(_mainModel),
+          '/products': (BuildContext context) => ProductsPage(_mainModel),
+          '/admin': (BuildContext context) => ProductAdminPage(_mainModel),
         },
         onGenerateRoute: (RouteSettings settings) {
           final List<String> pathElements = settings.name.split('/');
           print(pathElements);
-          if(pathElements[0] != '') {
+          if (pathElements[0] != '') {
             return null;
           }
 
-          if(pathElements[1] == 'product'){
+          if (pathElements[1] == 'product') {
             final String productId = pathElements[2];
-            final Product product = mainModel.allProducts.firstWhere((Product product) {
+            final Product product =
+                _mainModel.allProducts.firstWhere((Product product) {
               return product.id == productId;
             });
             return MaterialPageRoute<bool>(
@@ -63,8 +68,8 @@ class _MyAppState extends State<MyApp> {
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
-          return MaterialPageRoute(builder: (BuildContext context) => ProductsPage(mainModel)
-          );
+          return MaterialPageRoute(
+              builder: (BuildContext context) => ProductsPage(_mainModel));
         },
       ),
     );

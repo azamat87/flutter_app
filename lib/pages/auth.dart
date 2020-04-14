@@ -86,15 +86,9 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  void _submitForm(Function login, Function singup) async {
-    Map<String, dynamic> successInfo;
-    if (_authMode == AuthMode.Login) {
-      login(_formData['email'], _formData['password']);
-//      Navigator.pushReplacementNamed(context, '/products');
-      successInfo = await singup(_formData['email'], _formData['password']);
-    } else {
-      successInfo = await singup(_formData['email'], _formData['password']);
-    }
+  void _submitForm(Function authenticate) async {
+    Map<String, dynamic> successInfo = await authenticate(_formData['email'], _formData['password'], _authMode);
+
     if (successInfo['success']) {
       Navigator.pushReplacementNamed(context, '/products');
     } else {
@@ -163,7 +157,7 @@ class _AuthPageState extends State<AuthPage> {
                                     ? 'LOGIN'
                                     : 'SINGUP'),
                                 onPressed: () =>
-                                    _submitForm(model.login, model.singup),
+                                    _submitForm(model.authenticate),
                               );
                       },
                     )
