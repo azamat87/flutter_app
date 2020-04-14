@@ -218,25 +218,66 @@ class ProductModel extends ConnectedProductsModel {
     _showFavorites = !_showFavorites;
     notifyListeners();
   }
-}}
+}
 
 class UserModel extends ConnectedProductsModel {
-  void login(String email, String password) {
-    _authenticatedUser = User(id: "1", email: email, password: password);
+
+  final String _key = '';
+
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+//    _authenticatedUser = User(id: "1", email: email, password: password);
+    _isLoading = true;
+    notifyListeners();
+    Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+      'returnSecureToken': true
+    };
+    final Response response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$_key',
+        body: json.encode(authData), headers: {'Content-Type': 'application/jon'});
+
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    String message = 'Somthing went wrong';
+    if(responseData.containsKey('idToken')) {
+      hasError = false;
+      message = "Success";
+    } else if (responseData['error']['message'] == 'EMAIL_NOT_FOUND'){
+      message = 'This email was not found.';
+    } else if (responseData['error']['message'] == 'INVALID_PASSWORD'){
+      message = 'Invalid password.';
+    }
+    _isLoading = false;
+    notifyListeners();
+    return {'success': !hasError, 'message': message};
   }
 
   Future<Map<String, dynamic>> singup(String email, String password) async {
+    _isLoading = true;
+    notifyListeners();
     Map<String, dynamic> authData = {
       'email': email,
       'password': password,
       'returnSecureToken': true
     };
 
-    final Response response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=',
+    final Response response = await post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$_key',
         body: json.encode(authData), headers: {'Content-Type': 'application/jon'}
     );
 
-    return {'success': true};
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    String message = 'Somthing went wrong';
+    if(responseData.containsKey('idToken')) {
+      hasError = false;
+      message = "Success";
+    } else if (responseData['error']['message'] == 'EMAIL_EXISTS'){
+      message = 'This email alredy exists.';
+    }
+    _isLoading = false;
+    notifyListeners();
+    return {'success': !hasError, 'message': message};
   }
 
 }
