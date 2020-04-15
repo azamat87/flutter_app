@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutterapp/constants.dart';
@@ -224,6 +225,8 @@ class ProductModel extends ConnectedProductsModel {
 
 class UserModel extends ConnectedProductsModel {
 
+  Timer _authTimer;
+
   final String _key = '';
 
   User get user {
@@ -260,12 +263,14 @@ class UserModel extends ConnectedProductsModel {
           email: email,
           token: responseData['idToken']);
       message = "Success";
-
+      setAutoTimeout(int.parse(responseData['expiresIn']));
+      final DateTime now = DateTime.now();
+      final DateTime expiryTime = now.add(Duration(seconds: int.parse(responseData['expiresIn'])));
       final SharedPreferences shPref = await SharedPreferences.getInstance();
       shPref.setString('token', responseData['idToken']);
       shPref.setString('email', email);
       shPref.setString('userId', responseData['localId']);
-
+      shPref.setString('expiryTime', expiryTime.toIso8601String());
     } else if (responseData['error']['message'] == 'EMAIL_NOT_FOUND'){
       message = 'This email was not found.';
     } else if (responseData['error']['message'] == 'INVALID_PASSWORD'){
@@ -281,23 +286,40 @@ class UserModel extends ConnectedProductsModel {
   void autoAuthenticate() async{
     final SharedPreferences shPref = await SharedPreferences.getInstance();
     final String token = shPref.getString('token');
+    final String expiryTimeString = shPref.getString('expiryTime');
     if (token != null) {
+      final DateTime now = DateTime.now();
+      final parseExpiryTime = DateTime.parse(expiryTimeString);
+
+      if (parseExpiryTime.isBefore(now)) {
+        _authenticatedUser = null;
+        notifyListeners();
+        return;
+      }
+
       final String email = shPref.getString('email');
       final String userId = shPref.getString('userId');
+      final int tokenLifeSpan = parseExpiryTime.difference(now).inSeconds;
       _authenticatedUser = User(
           id: userId,
           email: email,
           token: token);
+      setAutoTimeout(tokenLifeSpan);
       notifyListeners();
     }
   }
 
   void logout() async {
     _authenticatedUser = null;
+    _authTimer.cancel();
     final SharedPreferences shPref = await SharedPreferences.getInstance();
     shPref.remove('token');
     shPref.remove('email');
     shPref.remove('userId');
+  }
+
+  void setAutoTimeout(int time) {
+    _authTimer = Timer(Duration(seconds: time), logout);
   }
 
 }
