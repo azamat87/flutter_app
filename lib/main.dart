@@ -23,10 +23,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final MainModel _mainModel = MainModel();
+  bool _isAuth = false;
 
   @override
   void initState() {
     _mainModel.autoAuthenticate();
+    _mainModel.userSubject.listen((bool isAuth) {
+      setState(() {
+        _isAuth = isAuth;
+      });
+    });
     super.initState();
   }
 
@@ -44,11 +50,18 @@ class _MyAppState extends State<MyApp> {
             buttonColor: Colors.deepPurple),
 //      home: AuthPage(),
         routes: {
-          '/': (BuildContext context) =>_mainModel.user == null ? AuthPage() : ProductsPage(_mainModel),
-          '/products': (BuildContext context) => ProductsPage(_mainModel),
-          '/admin': (BuildContext context) => ProductAdminPage(_mainModel),
+          '/': (BuildContext context) =>
+              !_isAuth ? AuthPage() : ProductsPage(_mainModel),
+          '/admin': (BuildContext context) =>
+              !_isAuth ? AuthPage() : ProductAdminPage(_mainModel),
         },
         onGenerateRoute: (RouteSettings settings) {
+          if (!_isAuth) {
+            return MaterialPageRoute<bool>(
+              builder: (BuildContext context) => AuthPage(),
+            );
+          }
+
           final List<String> pathElements = settings.name.split('/');
           print(pathElements);
           if (pathElements[0] != '') {
@@ -62,14 +75,16 @@ class _MyAppState extends State<MyApp> {
               return product.id == productId;
             });
             return MaterialPageRoute<bool>(
-              builder: (BuildContext context) => ProductPage(product),
+              builder: (BuildContext context) =>
+                  !_isAuth ? AuthPage() : ProductPage(product),
             );
           }
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-              builder: (BuildContext context) => ProductsPage(_mainModel));
+              builder: (BuildContext context) =>
+                  !_isAuth ? AuthPage() : ProductsPage(_mainModel));
         },
       ),
     );

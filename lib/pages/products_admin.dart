@@ -24,7 +24,7 @@ class ProductAdminPage extends StatelessWidget {
             leading: Icon(Icons.shop),
             title: Text('EasyList'),
             onTap: (){
-              Navigator.pushReplacementNamed(context, '/products');
+              Navigator.pushReplacementNamed(context, '/');
             },
           ),
           Divider(),
