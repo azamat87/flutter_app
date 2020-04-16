@@ -162,7 +162,7 @@ class ProductModel extends ConnectedProductsModel {
     });
   }
 
-  Future<Null> fetchProducts() {
+  Future<Null> fetchProducts({forOnlyUser = false}) {
     _isLoading = true;
     notifyListeners();
     return get('https://my-product-app-85b92.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
@@ -183,10 +183,17 @@ class ProductModel extends ConnectedProductsModel {
             image: productData[IMAGE],
             price: productData[PRICE],
             userEmail: productData[USER_EMAIL],
-            userId: productData[USER_ID]);
+            userId: productData[USER_ID],
+            isFavorite: productData[USER_WISHLIST] == null
+                ? false
+                : (productData[USER_WISHLIST] as Map<String, dynamic>).containsKey(_authenticatedUser.id)
+        );
         fetchedProductLit.add(product);
       });
-      _products = fetchedProductLit;
+      _products = forOnlyUser ? fetchedProductLit.where((Product product) {
+        return product.userId == _authenticatedUser.id;
+      }).toList()
+      : fetchedProductLit;
       _isLoading = false;
       notifyListeners();
       _selProductId = null;
@@ -197,9 +204,10 @@ class ProductModel extends ConnectedProductsModel {
     });
   }
 
-  void toggleProductFavoriteStatus() {
+  void toggleProductFavoriteStatus() async{
     final bool isCurrentlyFavorite = selectedProduct.isFavorite;
     final bool newFavoriteStatus = !isCurrentlyFavorite;
+
     final Product updatedProduct = Product(
         id: selectedProduct.id,
         title: selectedProduct.title,
@@ -211,6 +219,27 @@ class ProductModel extends ConnectedProductsModel {
         isFavorite: newFavoriteStatus);
     _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
+    Response response;
+    if(newFavoriteStatus) {
+      response = await put('https://my-product-app-85b92.firebaseio.com/products/${selectedProduct.id}/wishlistUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}',
+          body: json.encode(true));
+
+    } else {
+      response = await delete('https://my-product-app-85b92.firebaseio.com/products/${selectedProduct.id}/wishlistUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}');
+    }
+    if(response.statusCode != 200 && response.statusCode != 201) {
+      final Product updatedProduct = Product(
+          id: selectedProduct.id,
+          title: selectedProduct.title,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          image: selectedProduct.image,
+          userEmail: selectedProduct.userEmail,
+          userId: selectedProduct.userId,
+          isFavorite: newFavoriteStatus);
+      _products[selectedProductIndex] = updatedProduct;
+      notifyListeners();
+    }
   }
 
   void selectProduct(String productId) {
