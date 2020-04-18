@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterapp/constants.dart';
 import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/scoped_model/main.dart';
+import 'package:flutterapp/widgets/form_inputs/image.dart';
 import 'package:flutterapp/widgets/helpers/ensure_visible.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -19,13 +21,15 @@ class _ProductEditPageState extends State<ProductEditPage> {
     TITLE: null,
     DESCRIPTION: null,
     PRICE: null,
-    IMAGE: 'images/food.jpg'
+    IMAGE: null'
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleFocusNode = FocusNode();
   final _descFocusNode = FocusNode();
   final _priceFocusNode = FocusNode();
+
+  final _descTextController = TextEditingController();
 
   Widget _buildTitleTextField(Product product) {
     return EnsureVisibleWhenFocused(
@@ -47,12 +51,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildDescriptionTextField(Product product) {
+    if (product == null && _descTextController.text.trim() == '') {
+      _descTextController.text = '';
+    } else if (product != null && _descTextController.text.trim() == '') {
+      _descTextController.text = product.description;
+    }
+
     return EnsureVisibleWhenFocused(
       focusNode: _descFocusNode,
       child: TextFormField(
         focusNode: _descFocusNode,
         decoration: InputDecoration(labelText: 'Product Description'),
-        initialValue: product == null ? '' : product.description,
+//        initialValue: product == null ? '' : product.description,
+        controller: _descTextController,
         maxLines: 4,
         validator: (String value) {
           if (value.isEmpty || value.length < 10) {
@@ -87,6 +98,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
+  void setImage(File image) {
+    _formData[IMAGE] = image;
+  }
+
   void _submitForm(
       Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
@@ -95,35 +110,37 @@ class _ProductEditPageState extends State<ProductEditPage> {
     }
     _formKey.currentState.save();
     if (selectedProductIndex == -1) {
-      addProduct(_formData[TITLE], _formData[DESCRIPTION], _formData[PRICE],
-              _formData[IMAGE])
-          .then((bool success){
-            if(success) {
-              Navigator.pushReplacementNamed(context, '/products')
-                  .then((_) => setSelectedProduct(null));
-            } else {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context){
+      addProduct(_formData[TITLE],
+          _descTextController.text,
+          _formData[PRICE],
+          _formData[IMAGE])
+          .then((bool success) {
+        if (success) {
+          Navigator.pushReplacementNamed(context, '/products')
+              .then((_) => setSelectedProduct(null));
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text('Somthing went wrong'),
                   content: Text('Please try again'),
                   actions: <Widget>[
                     FlatButton(
-                        onPressed: (){
+                        onPressed: () {
                           Navigator.of(context).pop();
-                          },
+                        },
                         child: Text("OK"))
                   ],
                 );
               });
-            }
+        }
       });
     } else {
-      updateProduct(_formData[TITLE], _formData[DESCRIPTION], _formData[PRICE],
-          _formData[IMAGE])
+      updateProduct(_formData[TITLE], _descTextController.text, _formData[PRICE],
+              _formData[IMAGE])
           .then((_) => Navigator.pushReplacementNamed(context, '/products')
-          .then((_) => setSelectedProduct(null)));
+              .then((_) => setSelectedProduct(null)));
     }
   }
 
@@ -165,6 +182,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
               _buildTitleTextField(product),
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
+              SizedBox(height: 10.0),
+              ImageInput(),
               SizedBox(height: 10.0),
               _buildSubmitButton()
             ],
