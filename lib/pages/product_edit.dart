@@ -21,7 +21,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     TITLE: null,
     DESCRIPTION: null,
     PRICE: null,
-    IMAGE: null'
+    IMAGE: null
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -98,14 +98,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void setImage(File image) {
+  void _setImage(File image) {
     _formData[IMAGE] = image;
   }
 
   void _submitForm(
       Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState.validate() || (_formData[IMAGE] == null && selectedProductIndex == -1)) {
       return;
     }
     _formKey.currentState.save();
@@ -183,7 +183,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
               SizedBox(height: 10.0),
-              ImageInput(),
+              ImageInput(_setImage, product),
               SizedBox(height: 10.0),
               _buildSubmitButton()
             ],

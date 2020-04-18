@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutterapp/constants.dart';
 import 'package:flutterapp/models/auth.dart';
 import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/models/user.dart';
 import 'package:http/http.dart';
+import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
+
 
 class ConnectedProductsModel extends Model {
   List<Product> _products = [];
@@ -56,10 +60,30 @@ class ProductModel extends ConnectedProductsModel {
     });
   }
 
+  Future<Map<String, dynamic>> uploadImage(File image, {String imagePath}) async {
+
+    final mimeTypeData = lookupMimeType(image.path).split('/');
+    final imageUploadRequest = MultipartRequest('POST', Uri.parse('gs://my-product-app-85b92.appspot.com'));
+
+    final file = await MultipartFile.fromPath('image', image.path, contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+
+    imageUploadRequest.files.add(file);
+    if(imagePath != null) {
+      imageUploadRequest.fields['imagePath'] = Uri.encodeComponent(imagePath);
+    }
+
+  }
   Future<bool> addProduct(String title, String description, double price,
-      String image) async {
+      File image) async {
     _isLoading = true;
     notifyListeners();
+
+    final uploadData = await uploadImage(image);
+
+    if(uploadData == null) {
+      return false;
+    }
+
     final Map<String, dynamic> productData = {
       TITLE: title,
       DESCRIPTION: description,
@@ -86,7 +110,7 @@ class ProductModel extends ConnectedProductsModel {
           title: title,
           description: description,
           price: price,
-          image: image,
+          image: 'image',
           userEmail: _authenticatedUser.email,
           userId: _authenticatedUser.id);
 
