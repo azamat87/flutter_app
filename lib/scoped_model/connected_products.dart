@@ -67,10 +67,29 @@ class ProductModel extends ConnectedProductsModel {
 
     final file = await MultipartFile.fromPath('image', image.path, contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
 
+    // update and fix
     imageUploadRequest.files.add(file);
     if(imagePath != null) {
       imageUploadRequest.fields['imagePath'] = Uri.encodeComponent(imagePath);
     }
+
+    imageUploadRequest.headers['Authorization'] = 'Bearer ${_authenticatedUser.token}';
+//
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await Response.fromStream(streamedResponse);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        print('Something went wrong');
+        print(json.decode(response.body));
+        return null;
+      }
+      final responseData = json.decode(response.body);
+      return responseData;
+    } catch (error) {
+      print(error);
+      return null;
+    }
+
 
   }
   Future<bool> addProduct(String title, String description, double price,
@@ -87,7 +106,7 @@ class ProductModel extends ConnectedProductsModel {
     final Map<String, dynamic> productData = {
       TITLE: title,
       DESCRIPTION: description,
-      IMAGE: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAQ8hFzWNhvpt3M0BCsmoKG1YvvPiLcBlkZ5cU7Y9tTizqXj4&s',
+      IMAGE: uploadData.,
       PRICE: price,
       USER_EMAIL: _authenticatedUser.email,
       USER_ID: _authenticatedUser.id

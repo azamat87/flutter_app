@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterapp/models/product.dart';
+import 'package:flutterapp/widgets/products/product_fab.dart';
 import 'package:flutterapp/widgets/ui_elements/title_default.dart';
 
 
@@ -84,6 +85,7 @@ class ProductPage extends StatelessWidget {
               )
             ],
           ),
+        floatingActionButton: ProductFab(),
         )
     );
   }

@@ -71,7 +71,6 @@ class ProductCard extends StatelessWidget {
           ),
           _buildTitlePriceRow(),
           AddressTag('Union Square'),
-          Text(product.userEmail!=null ? product.userEmail: 'userEmail'),
           _buildActionButtons(context)
         ],
       ),
