@@ -13,7 +13,7 @@ class AuthPage extends StatefulWidget {
   }
 }
 
-class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
+class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   final Map<String, dynamic> _formData = {
     'email': null,
     'password': null,
@@ -23,12 +23,13 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
   final TextEditingController _passwordTextController = TextEditingController();
   AuthMode _authMode = AuthMode.Login;
   AnimationController _controller;
+  Animation<Offset> _slideAnimation;
 
   DecorationImage _buildBackdroundImage() {
     return DecorationImage(
         fit: BoxFit.cover,
         colorFilter:
-            ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
+        ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
         image: AssetImage('images/background.jpg'));
   }
 
@@ -39,7 +40,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
       keyboardType: TextInputType.emailAddress,
       validator: (String value) {
         if (value.isEmpty ||
-            !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+            !RegExp(
+                r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
                 .hasMatch(value)) {
           return 'Enter a valid email';
         }
@@ -77,21 +79,28 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
   Widget _buildPasswordConfirmTextField() {
     return FadeTransition(
       opacity: CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-      child: TextFormField(
-        decoration: InputDecoration(
-            labelText: 'Confirm Password', filled: true, fillColor: Colors.white),
-        obscureText: true,
-        validator: (String value) {
-          if (_passwordTextController.text != value && _authMode == AuthMode.Singup) {
-            return 'Password do not match.';
-          }
-        },
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              filled: true,
+              fillColor: Colors.white),
+          obscureText: true,
+          validator: (String value) {
+            if (_passwordTextController.text != value &&
+                _authMode == AuthMode.Singup) {
+              return 'Password do not match.';
+            }
+          },
+        ),
       ),
     );
   }
 
   void _submitForm(Function authenticate) async {
-    Map<String, dynamic> successInfo = await authenticate(_formData['email'], _formData['password'], _authMode);
+    Map<String, dynamic> successInfo = await authenticate(
+        _formData['email'], _formData['password'], _authMode);
 
     if (successInfo['success']) {
 //      Navigator.pushReplacementNamed(context, '/');
@@ -116,13 +125,20 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
 
   @override
   void initState() {
-    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _slideAnimation =
+        Tween<Offset>(begin: Offset(0.0, -2.0), end: Offset.zero).animate(
+            CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final double deviceWidth = MediaQuery.of(context).size.width;
+    final double deviceWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
 
     return Scaffold(
@@ -152,7 +168,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
                                 ? AuthMode.Singup
                                 : AuthMode.Login;
                           });
-                          if(_authMode == AuthMode.Login) {
+                          if (_authMode == AuthMode.Login) {
                             setState(() {
                               _authMode = AuthMode.Singup;
                             });
@@ -165,19 +181,21 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
                           }
                         },
                         child: Text(
-                            'Switch to ${_authMode == AuthMode.Login ? 'Singup' : 'Login'}')),
+                            'Switch to ${_authMode == AuthMode.Login
+                                ? 'Singup'
+                                : 'Login'}')),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
                         return model.isLoading
                             ? CircularProgressIndicator()
                             : RaisedButton(
-                                child: Text(_authMode == AuthMode.Login
-                                    ? 'LOGIN'
-                                    : 'SINGUP'),
-                                onPressed: () =>
-                                    _submitForm(model.authenticate),
-                              );
+                          child: Text(_authMode == AuthMode.Login
+                              ? 'LOGIN'
+                              : 'SINGUP'),
+                          onPressed: () =>
+                              _submitForm(model.authenticate),
+                        );
                       },
                     )
                   ],
