@@ -13,7 +13,7 @@ class AuthPage extends StatefulWidget {
   }
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin{
   final Map<String, dynamic> _formData = {
     'email': null,
     'password': null,
@@ -22,6 +22,7 @@ class _AuthPageState extends State<AuthPage> {
 
   final TextEditingController _passwordTextController = TextEditingController();
   AuthMode _authMode = AuthMode.Login;
+  AnimationController _controller;
 
   DecorationImage _buildBackdroundImage() {
     return DecorationImage(
@@ -74,15 +75,18 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Widget _buildPasswordConfirmTextField() {
-    return TextFormField(
-      decoration: InputDecoration(
-          labelText: 'Confirm Password', filled: true, fillColor: Colors.white),
-      obscureText: true,
-      validator: (String value) {
-        if (_passwordTextController.text != value) {
-          return 'Password do not match.';
-        }
-      },
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      child: TextFormField(
+        decoration: InputDecoration(
+            labelText: 'Confirm Password', filled: true, fillColor: Colors.white),
+        obscureText: true,
+        validator: (String value) {
+          if (_passwordTextController.text != value && _authMode == AuthMode.Singup) {
+            return 'Password do not match.';
+          }
+        },
+      ),
     );
   }
 
@@ -111,6 +115,12 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   @override
+  void initState() {
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
@@ -132,9 +142,7 @@ class _AuthPageState extends State<AuthPage> {
                     SizedBox(height: 10.0),
                     _buildPasswordTextField(),
                     SizedBox(height: 10.0),
-                    _authMode == AuthMode.Singup
-                        ? _buildPasswordConfirmTextField()
-                        : Container(),
+                    _buildPasswordConfirmTextField(),
                     _buildAcceptSwitch(),
                     SizedBox(height: 10.0),
                     FlatButton(
@@ -144,6 +152,17 @@ class _AuthPageState extends State<AuthPage> {
                                 ? AuthMode.Singup
                                 : AuthMode.Login;
                           });
+                          if(_authMode == AuthMode.Login) {
+                            setState(() {
+                              _authMode = AuthMode.Singup;
+                            });
+                            _controller.forward();
+                          } else {
+                            setState(() {
+                              _authMode = AuthMode.Login;
+                            });
+                            _controller.reverse();
+                          }
                         },
                         child: Text(
                             'Switch to ${_authMode == AuthMode.Login ? 'Singup' : 'Login'}')),
