@@ -127,8 +127,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   void initState() {
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-    _slideAnimation =
-        Tween<Offset>(begin: Offset(0.0, -2.0), end: Offset.zero).animate(
+    _slideAnimation = Tween<Offset>(begin: Offset(0.0, -2.0), end: Offset.zero).animate(
             CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
     super.initState();
   }
@@ -163,11 +162,6 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     SizedBox(height: 10.0),
                     FlatButton(
                         onPressed: () {
-                          setState(() {
-                            _authMode = _authMode == AuthMode.Login
-                                ? AuthMode.Singup
-                                : AuthMode.Login;
-                          });
                           if (_authMode == AuthMode.Login) {
                             setState(() {
                               _authMode = AuthMode.Singup;

@@ -106,7 +106,7 @@ class ProductModel extends ConnectedProductsModel {
     final Map<String, dynamic> productData = {
       TITLE: title,
       DESCRIPTION: description,
-      IMAGE: uploadData.,
+      IMAGE: uploadData,
       PRICE: price,
       USER_EMAIL: _authenticatedUser.email,
       USER_ID: _authenticatedUser.id

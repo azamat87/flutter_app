@@ -62,27 +62,40 @@ class ProductPage extends StatelessWidget {
           appBar: AppBar(
             title: Text(product.title),
           ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              FadeInImage(
-                image: NetworkImage(product.image),
-                height: 300,
-                fit: BoxFit.cover,
-                placeholder: AssetImage('images/food.png'),
-              ),
-              Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: TitleDefault(product.title)),
-              _buildAddressPriceRow(product.price),
-              Container(
-                padding: EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  color: Theme.of(context).accentColor,
-                  child: Text('DELETE'),
-                  onPressed: () => _showWarningDialog(context),
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: 256.0,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(product.title),
+                  background: Hero(
+                    tag: product.id,
+                    child: FadeInImage(
+                      image: NetworkImage(product.image),
+                      height: 300,
+                      fit: BoxFit.cover,
+                      placeholder: AssetImage('images/food.png'),
+                    ),
+                  ),
                 ),
-              )
+              ),
+              SliverList(delegate: SliverChildListDelegate([
+                  Container(
+                      padding: EdgeInsets.all(10.0),
+                      alignment: Alignment.center,
+                      child: TitleDefault(product.title)),
+                  _buildAddressPriceRow(product.price),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    child: RaisedButton(
+                      color: Theme.of(context).accentColor,
+                      child: Text('DELETE'),
+                      onPressed: () => _showWarningDialog(context),
+                    ),
+                  )
+                ]
+              ),)
             ],
           ),
         floatingActionButton: ProductFab(product),
