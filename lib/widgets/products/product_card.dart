@@ -9,9 +9,8 @@ import 'package:scoped_model/scoped_model.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final int productIndex;
 
-  ProductCard(this.product, this.productIndex);
+  ProductCard(this.product);
 
   Widget _buildTitlePriceRow() {
     return Container(
@@ -19,9 +18,9 @@ class ProductCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          TitleDefault(product.title),
-          SizedBox(width: 8.0),
-          PriceTag(product.price.toString()),
+          Flexible(child: TitleDefault(product.title)),
+          Flexible(child: SizedBox(width: 8.0)),
+          Flexible(child: PriceTag(product.price.toString())),
         ],
       ),
     );
@@ -39,19 +38,19 @@ class ProductCard extends StatelessWidget {
                     .of(context)
                     .accentColor,
                 onPressed: () {
-                  model.selectProduct(model.allProducts[productIndex].id);
+                  model.selectProduct(product.id);
                   Navigator.pushNamed<bool>(
-                      context, '/product/' + model.allProducts[productIndex].id)
+                      context, '/product/' + product.id)
                   .then((_) => model.selectProduct(null));
                 }
               ),
               IconButton(
-                icon: Icon(model.allProducts[productIndex].isFavorite
+                icon: Icon(product.isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border),
                 color: Colors.red,
                 onPressed: () {
-                  model.selectProduct(model.allProducts[productIndex].id);
+                  model.selectProduct(product.id);
                   model.toggleProductFavoriteStatus();
                 },
               )
@@ -76,6 +75,7 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           _buildTitlePriceRow(),
+          SizedBox(height: 10.0,),
           AddressTag('Union Square'),
           _buildActionButtons(context)
         ],

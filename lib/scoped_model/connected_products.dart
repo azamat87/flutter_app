@@ -205,8 +205,11 @@ class ProductModel extends ConnectedProductsModel {
     });
   }
 
-  Future<Null> fetchProducts({forOnlyUser = false}) {
+  Future<Null> fetchProducts({forOnlyUser = false, clearExisting = false}) {
     _isLoading = true;
+    if(clearExisting) {
+      _products = [];
+    }
     notifyListeners();
     return get('https://my-product-app-85b92.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
         .then<Null>((Response response) {
@@ -283,6 +286,7 @@ class ProductModel extends ConnectedProductsModel {
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
     }
+    _selProductId = null;
   }
 
   void selectProduct(String productId) {
@@ -393,6 +397,7 @@ class UserModel extends ConnectedProductsModel {
     _authenticatedUser = null;
     _authTimer.cancel();
     _userSubject.add(false);
+    _selProductId = null;
     final SharedPreferences shPref = await SharedPreferences.getInstance();
     shPref.remove('token');
     shPref.remove('email');
