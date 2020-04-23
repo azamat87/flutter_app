@@ -3,6 +3,7 @@ import 'package:flutterapp/models/auth.dart';
 import 'package:flutterapp/pages/products.dart';
 import 'package:flutterapp/pages/products_admin.dart';
 import 'package:flutterapp/scoped_model/main.dart';
+import 'package:flutterapp/widgets/ui_elements/adaptive_progress.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 
@@ -182,7 +183,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
                         return model.isLoading
-                            ? CircularProgressIndicator()
+                            ? AdaptiveProgress()
                             : RaisedButton(
                           child: Text(_authMode == AuthMode.Login
                               ? 'LOGIN'

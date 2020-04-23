@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterapp/constants.dart';
 import 'package:flutterapp/models/product.dart';
 import 'package:flutterapp/scoped_model/main.dart';
 import 'package:flutterapp/widgets/form_inputs/image.dart';
 import 'package:flutterapp/widgets/helpers/ensure_visible.dart';
+import 'package:flutterapp/widgets/ui_elements/adaptive_progress.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ProductEditPage extends StatefulWidget {
@@ -105,15 +107,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   void _submitForm(
       Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate() || (_formData[IMAGE] == null && selectedProductIndex == -1)) {
+    if (!_formKey.currentState.validate() ||
+        (_formData[IMAGE] == null && selectedProductIndex == -1)) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == -1) {
-      addProduct(_formData[TITLE],
-          _descTextController.text,
-          _formData[PRICE],
-          _formData[IMAGE])
+      addProduct(_formData[TITLE], _descTextController.text, _formData[PRICE],
+              _formData[IMAGE])
           .then((bool success) {
         if (success) {
           Navigator.pushReplacementNamed(context, '/products')
@@ -137,8 +138,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
         }
       });
     } else {
-      updateProduct(_formData[TITLE], _descTextController.text, _formData[PRICE],
-              _formData[IMAGE])
+      updateProduct(_formData[TITLE], _descTextController.text,
+              _formData[PRICE], _formData[IMAGE])
           .then((_) => Navigator.pushReplacementNamed(context, '/products')
               .then((_) => setSelectedProduct(null)));
     }
@@ -149,7 +150,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         builder: (BuildContext context, Widget widget, MainModel model) {
       return model.isLoading
           ? Center(
-              child: CircularProgressIndicator(),
+              child: AdaptiveProgress(),
             )
           : RaisedButton(
               textColor: Colors.white,

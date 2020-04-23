@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/scoped_model/main.dart';
 import 'package:flutterapp/widgets/products/products.dart';
+import 'package:flutterapp/widgets/ui_elements/adaptive_progress.dart';
 import 'package:flutterapp/widgets/ui_elements/logout_list_tile.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -55,7 +56,7 @@ class _ProductsPageState extends State<ProductsPage> {
       if(model.displayedProducts.length > 0 && !model.isLoading) {
         content = Products();
       } else if (model.isLoading) {
-        content = Center(child: CircularProgressIndicator());
+        content = Center(child: AdaptiveProgress());
       }
       return RefreshIndicator(onRefresh: model.fetchProducts, child: content);
     });

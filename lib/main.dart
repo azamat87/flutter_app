@@ -5,6 +5,7 @@ import 'package:flutterapp/pages/product.dart';
 import 'package:flutterapp/pages/products.dart';
 import 'package:flutterapp/pages/products_admin.dart';
 import 'package:flutterapp/scoped_model/main.dart';
+import 'package:flutterapp/widgets/adaptive_theme.dart';
 import 'package:flutterapp/widgets/helpers/custom_route.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -44,11 +45,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'EasyList',
         // debugShowMaterialGrid: true,
-        theme: ThemeData(
-            brightness: Brightness.light,
-            primarySwatch: Colors.deepOrange,
-            accentColor: Colors.deepPurple,
-            buttonColor: Colors.deepPurple),
+        theme: getAdaptiveThemeData(context),
 //      home: AuthPage(),
         routes: {
           '/': (BuildContext context) =>
